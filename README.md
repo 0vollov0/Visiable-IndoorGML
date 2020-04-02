@@ -22,7 +22,7 @@ http://localhost:3000/ 접속
 
 indoorGML 데이터의 지도 좌표를 찍는다.
 
-[사진]
+![1](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/1.PNG)
 
 지도 좌표와 대응되는 총 4개의 좌표가 필요합니다.
 
@@ -39,7 +39,7 @@ indoorGML 데이터의 지도 좌표를 찍는다.
 
 visiable-indoorgml-convert-server에서 변환된 좌표값으로 지도에 indoorGML 구조를 표시합니다.
 
-[사진]
+![2](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/2.PNG)
 
 ## 컨트롤
 
