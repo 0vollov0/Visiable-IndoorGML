@@ -1,12 +1,12 @@
 # Visiable-IndoorGML
  
-## Installation and Run
+## 설치 및 실행
 
-```js
+```
 npm install
 ```
 
-```js
+```
 npm start
 ```
 
