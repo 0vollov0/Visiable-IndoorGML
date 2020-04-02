@@ -38,11 +38,13 @@ document.getElementById('send-button').addEventListener('click',()=>{
     .then(polygonDatas => {
         drawingTool.drawPolygons(polygonDatas);
         drawingTool.initialize(false);
+        document.getElementById('indoorGML-file').value = null
     })
 })
 
 document.getElementById('initialize-button').addEventListener('click',()=>{
     drawingTool.initialize(true);
+    document.getElementById('indoorGML-file').value = null
 })
 
 
