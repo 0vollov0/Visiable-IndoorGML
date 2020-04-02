@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>OpenLayers</title>
+    <style>
+      html, body, #map-container {
+        margin: 0;
+        height: 90%;
+        width: 100%;
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map-container"></div>
+    <div id="mouse-position"></div>
+    <div>
+      <li id="user-clicked-points">        
+      </li>
+    </div>
+    <form action="" method="post">
+      <input type="file" name="indoorGML" id="indoorGML-file" accept=".gml">
+      <input type="button" name="coordinates" id="send-button" value="Send">
+      <input type="button" name="initialize" id="initialize-button" value="Initialize">
+    </form>
+    </div>
+  </body>
+</html>
