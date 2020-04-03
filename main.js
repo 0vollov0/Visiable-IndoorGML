@@ -39,6 +39,18 @@ document.getElementById('send-button').addEventListener('click',()=>{
         drawingTool.drawPolygons(polygonDatas);
         drawingTool.initialize(false);
         document.getElementById('indoorGML-file').value = null
+    }).then(()=>{
+        fetch('http://localhost:9000/IndoorGML')
+        .then(response => response.blob())
+        .then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = "converted_indoorGML.gml";
+            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+            a.click();    
+            a.remove();  //afterwards we remove the element again         
+        });
     })
 })
 
@@ -81,6 +93,8 @@ map.addEventListener('click',(event)=>{
     let pnt = new point([parseFloat(coordinate[0]),parseFloat(coordinate[1])]).transform('EPSG:4326', 'EPSG:3857');    
     let changePoints = pnt.getCoordinates();
     
+    console.log(changePoints);
+
     drawingTool.drawCircle(changePoints);
 
     let ul = document.createElement('ul');
