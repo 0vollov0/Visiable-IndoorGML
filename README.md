@@ -41,6 +41,8 @@ visiable-indoorgml-convert-server에서 변환된 좌표값으로 지도에 indo
 
 ![2](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/2.PNG)
 
+좌표 변환된 indoorGML 파일이 다운로드 됩니다.
+
 ## 컨트롤
 
 MouseLeft : 지도상에 점을 찍습니다.
