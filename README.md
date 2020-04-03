@@ -50,3 +50,11 @@ MouseRight : 가장 최근에 찍은 점을 삭제합니다.
 Initialize button : 모든 상태를 초기화합니다.
 
 Send button : 유저가 표시한 점 좌표들과 IndoorGML 파일을 visiable-indoorgml-convert-server에 데이터를 보냅니다.
+
+## 테스트
+
+부산대학교 자연대 연구실험동 건물
+
+IndoorGML 파일 https://github.com/0vollov0/Visiable-IndoorGML/tree/master/IndoorGML 
+
+
