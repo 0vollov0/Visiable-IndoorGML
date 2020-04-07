@@ -7,9 +7,26 @@ import {fromLonLat} from 'ol/proj';
 import {createStringXY} from 'ol/coordinate'
 import point from 'ol/geom/Point';
 import DrawingTool from './tool/DrawingTool'
+import IndoorGMLTool from './tool/IndoorGMLTool'
 
 
 let userClickedPointsView = document.getElementById('user-clicked-points');
+let indoorGMLTool = new IndoorGMLTool();
+
+
+document.getElementById('file').addEventListener('change',(event)=>{
+    indoorGMLTool.readFile(event.target.files[0]);
+})
+
+// function readFile (file){
+//     var reader = new FileReader();
+//     reader.onload = () => {
+//         readed_indoorGML = reader.result;
+//         console.log(readed_indoorGML);
+        
+//     }
+//     reader.readAsText(file,"euc-kr");
+// }
 
 document.getElementById('send-button').addEventListener('click',()=>{    
     let coordinates = {};
@@ -26,7 +43,7 @@ document.getElementById('send-button').addEventListener('click',()=>{
         if (bottom == null || parseFloat(coordinate[1]) < bottom) {bottom = coordinate[1]; coordinates.bottom = element.innerText;}
     });
 
-    coordinates = JSON.stringify(coordinates);
+    coordinates = JSON.stringify(coordinates);  
     let data = new FormData();
     data.append('indoorGML',document.getElementById('indoorGML-file').files[0]);
     data.append('coordinates',coordinates);
@@ -36,6 +53,8 @@ document.getElementById('send-button').addEventListener('click',()=>{
         body : data
     }).then(res => res.json())
     .then(polygonDatas => {
+        console.log(polygonDatas);
+        
         drawingTool.drawPolygons(polygonDatas);
         drawingTool.initialize(false);
         document.getElementById('indoorGML-file').value = null
