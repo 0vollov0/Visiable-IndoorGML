@@ -12,10 +12,8 @@ import Polygon from 'ol/geom/Polygon';
 
 import Point from 'ol/geom/Point'
 import LineString from 'ol/geom/LineString'
-import {Select,Translate,Modify} from 'ol/interaction'
-import RotateFeatureInteraction from 'ol-rotate-feature'
-import {Map, View} from 'ol';
-import {click, pointerMove, shiftKeyOnly,always} from 'ol/events/condition';
+import { View} from 'ol';
+import {shiftKeyOnly} from 'ol/events/condition';
 import Transform from 'ol-ext/interaction/Transform';
 
 Array.prototype.division = function (n) {

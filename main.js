@@ -1,14 +1,12 @@
 import {Map, View} from 'ol';
 import TileLayer from 'ol/layer/Tile';
-import OSMSource from 'ol/source/OSM';
 import XYZSource from 'ol/source/XYZ';
 import {MousePosition} from 'ol/control'
 import {fromLonLat} from 'ol/proj';
 import {createStringXY} from 'ol/coordinate'
-import point from 'ol/geom/Point';
 import DrawingTool from './tool/DrawingTool'
 import IndoorGMLTool from './tool/IndoorGMLTool'
-import Projection from 'ol/proj/Projection';
+
 var FileSaver = require('file-saver');
 
 
