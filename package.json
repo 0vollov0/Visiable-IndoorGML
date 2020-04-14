@@ -6,9 +6,12 @@
   "main": "main.js",
   "dependencies": {
     "colormap": "2.3.1",
+    "file-saver": "2.0.2",
     "ol": "6.0.0",
+    "ol-ext": "3.1.11",
     "ol-hashed": "2.0.0",
-    "ol-mapbox-style": "4.3.1"
+    "ol-mapbox-style": "4.3.1",
+    "xml2js": "0.4.23"
   },
   "devDependencies": {
     "copy-webpack-plugin": "5.0.2",
