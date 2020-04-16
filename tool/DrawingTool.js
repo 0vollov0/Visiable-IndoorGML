@@ -13,8 +13,9 @@ import Polygon from 'ol/geom/Polygon';
 import Point from 'ol/geom/Point'
 import LineString from 'ol/geom/LineString'
 import { View} from 'ol';
-import {shiftKeyOnly} from 'ol/events/condition';
+import {shiftKeyOnly,altKeyOnly} from 'ol/events/condition';
 import Transform from 'ol-ext/interaction/Transform';
+import Select from 'ol/interaction/Select';
 
 Array.prototype.division = function (n) {
     var arr = this;
@@ -47,7 +48,7 @@ export default class {
             // filter: function(f,l) { return f.getGeometry().getType()==='Polygon'; },
             // layers: [vector],
             hitTolerance: 2,
-            translateFeature: true,
+            translateFeature: false,
             scale: true,
             rotate: true,
             keepAspectRatio: undefined,
@@ -57,7 +58,6 @@ export default class {
         
         this.interaction.on (['select'], (e) =>{
             this.selectedFeature = e.feature;
-            //console.log(this.selectedFeature);
         });
           
         this.map.addInteraction(this.interaction);
@@ -68,6 +68,15 @@ export default class {
             this.centerPixel = [pixel[0]/2,pixel[1]/2];
             this.centerCoordinate = this.map.getCoordinateFromPixel(this.centerPixel);
         });
+
+        this.select = new Select({
+            condition: altKeyOnly,
+            filter: (feature, layer) => {
+                if (layer != null) layer.getSource().refresh();
+            }
+        })
+
+        this.map.addInteraction(this.select);
     }
 
     getCoordinatesFromSelectedFeatures(){
@@ -192,19 +201,15 @@ export default class {
           })
           const polygon = new Feature({
             name: 'polygon',
-            geometry: new Polygon([[
-                [14369394.279478746, 14369394.279478746],
-                [14369393.42174834, 14369393.42174834],
-                [14369401.386387812, 14369401.386387812],
-                [14369402.162429607, 14369402.162429607],
-                [14369394.279478746, 14369394.279478746]],
+            geometry: new Polygon([
                 [
                     [14367676.71451314, 4195137.45143612],
                     [14367628.94137046, 4194860.36720858],
                     [14368331.20656783, 4194688.38389494],
                     [14368536.63108135, 4195209.11115013]
                 ]
-            ])
+            ]),
+            point: new Point([ 14367025.80544415, 4195356.01356387 ])
           })
         
         //console.log(polygon.getGeometry().flatCoordinates);
@@ -213,7 +218,7 @@ export default class {
         const testLayer = new VectorLayer({
             source: new VectorSource({
                 projection: 'EPSG:33857',
-                features: [ point, line, polygon ]
+                features: [ polygon]
               })
         })
 
@@ -251,8 +256,6 @@ export default class {
     }
 
     drawIndoorGML(indoorVectorArray){
-        console.log(indoorVectorArray);
-        
         const polygon = new Feature({
             name: 'polygon',
             geometry: new Polygon(indoorVectorArray)
@@ -269,7 +272,8 @@ export default class {
             center: [indoorVectorArray[0][0][0],indoorVectorArray[0][0][1]],
             zoom: 18
         }))
+        this.testLayer = indoorLayer;
         this.map.addLayer(indoorLayer);
     }
-    
+
 }
