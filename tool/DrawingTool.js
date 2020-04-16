@@ -256,6 +256,8 @@ export default class {
     }
 
     drawIndoorGML(indoorVectorArray){
+        //console.log(indoorVectorArray);
+        
         const polygon = new Feature({
             name: 'polygon',
             geometry: new Polygon(indoorVectorArray)
@@ -272,7 +274,7 @@ export default class {
             center: [indoorVectorArray[0][0][0],indoorVectorArray[0][0][1]],
             zoom: 18
         }))
-        this.testLayer = indoorLayer;
+
         this.map.addLayer(indoorLayer);
     }
 

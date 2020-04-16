@@ -12,11 +12,12 @@ var FileSaver = require('file-saver');
 
 
 
-let userClickedPointsView = document.getElementById('user-clicked-points');
+//let userClickedPointsView = document.getElementById('user-clicked-points');
 let indoorGMLTool = new IndoorGMLTool();
 
 
 document.getElementById('file').addEventListener('change',(event)=>{
+    console.log(event.target.files[0]);
     indoorGMLTool.getIndoorGMLVectorArray(event.target.files[0]).then((vectorArray) => drawingTool.drawIndoorGML(vectorArray))
 })
 

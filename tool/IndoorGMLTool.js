@@ -6,7 +6,7 @@ export default class {
         this.primalSpaceFeatures = null;
         this.cellSpaceMember_array = [];
         this.linearRing_array = [];
-        this.polygons_array = [];
+        //this.polygons_array = [];
     }
 
     // readFile = (file) => {
@@ -77,6 +77,7 @@ export default class {
         return new Promise((resolve,reject)=>{
             var reader = new FileReader();
             reader.readAsText(file,"euc-kr");
+            let polygons_array = [];
             reader.onload = () => {
                 this.readed_indoorGML = reader.result;
 
@@ -103,10 +104,10 @@ export default class {
                                 })
                             }
                         })
-                        this.polygons_array.push(polygon_array);
+                        polygons_array.push(polygon_array);
                     })
                 })
-                resolve(this.polygons_array);
+                resolve(polygons_array);
             }
         })
     }
