@@ -17,14 +17,15 @@ let indoorGMLTool = new IndoorGMLTool();
 
 
 document.getElementById('file').addEventListener('change',(event)=>{
-    console.log(event.target.files[0]);
     indoorGMLTool.getIndoorGMLVectorArray(event.target.files[0]).then((vectorArray) => drawingTool.drawIndoorGML(vectorArray))
+    //indoorGMLTool.getIndoorGMLVectorArray(event.target.files[0]).then((data) => console.log(data));
 })
 
 document.getElementById('convet_indoorGML').addEventListener('click',()=>{
     if(document.getElementById('file').files[0] == undefined )  return;
     let coordinateFromSelectedFeatures = drawingTool.getCoordinatesFromSelectedFeatures();
     if (coordinateFromSelectedFeatures == undefined) return;
+ 
     indoorGMLTool.convertIndoorGMLVector(document.getElementById('file').files[0],coordinateFromSelectedFeatures).then((gml)=>{
         var blob = new Blob([gml], {type: "gml;charset=utf-8"});
         FileSaver.saveAs(blob, "converted_IndoorGML.gml");
@@ -138,7 +139,7 @@ map.addControl(mousePositionCtrl);
 //     console.log(e);
 // })
 
-//drawingTool.test();
+drawingTool.test();
 
   
 

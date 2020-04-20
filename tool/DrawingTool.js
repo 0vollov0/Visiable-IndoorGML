@@ -11,11 +11,14 @@ import {
 import Polygon from 'ol/geom/Polygon';
 
 import Point from 'ol/geom/Point'
+import MultiPoint from 'ol/geom/MultiPoint';
 import LineString from 'ol/geom/LineString'
+import MultiLineString from 'ol/geom/MultiLineString';
 import { View} from 'ol';
 import {shiftKeyOnly,altKeyOnly} from 'ol/events/condition';
 import Transform from 'ol-ext/interaction/Transform';
 import Select from 'ol/interaction/Select';
+
 
 Array.prototype.division = function (n) {
     var arr = this;
@@ -36,6 +39,7 @@ export default class {
         this.circleLayerArray = new Array();
         this.polygonsLayerArray = new Array();
         this.userClickedPointsView = userClickedPointsView;
+        //this.featureTypeArray = ['cellspace','state','transition'];
 
         this.interaction = new Transform({
             enableRotatedTransform: false,
@@ -56,10 +60,81 @@ export default class {
             stretch: true
           });
         
+        
+        
+
         this.interaction.on (['select'], (e) =>{
             this.selectedFeature = e.feature;
+            console.log(e);
+            
         });
-          
+
+        this.interaction.on('rotating',(e) => {
+            //$('#info').text("rotate: "+((e.angle*180/Math.PI -180)%360+180).toFixed(2)); 
+            // Set angle attribute to be used on style !
+            //e.feature.set('angle', startangle - e.angle);
+
+            console.log(e);
+            
+        });
+
+        this.interaction.on('translating', function (e){
+            // d[0]+=e.delta[0];
+            // d[1]+=e.delta[1];
+            // $('#info').text("translate: "+d[0].toFixed(2)+","+d[1].toFixed(2)); 
+            // if (firstPoint) {
+            //     interaction.setCenter(e.features.getArray()[0].getGeometry().getFirstCoordinate());
+            // }
+            let featureTypeArray = ['cellspace','state','transition'];
+            
+            
+            featureTypeArray.map((feature)=>{
+                
+                if (feature != e.feature.geometryName_) {
+                    console.log(feature);
+                    let newFlatCoordinates = [];
+                    e.feature.values_[feature].flatCoordinates.map((element,index)=>{
+                        if (index%2 == 0){
+                            newFlatCoordinates.push(element+e.delta[0]);
+                        }else{
+                            newFlatCoordinates.push(element+e.delta[1]);
+                        }
+                    })
+                    e.feature.values_[feature].flatCoordinates = newFlatCoordinates;
+                    e.feature.values_[feature].orientedFlatCoordinates_ = newFlatCoordinates;
+                    e.feature.values_[feature].extent_[0] += e.delta[0];
+                    e.feature.values_[feature].extent_[1] += e.delta[1];
+                    e.feature.values_[feature].extent_[2] += e.delta[0];
+                    e.feature.values_[feature].extent_[3] += e.delta[1];
+                }
+            })
+            
+            
+            
+
+            // let stateFlatCoordinates = [];
+            // e.feature.values_['state'].flatCoordinates.map((element,index)=>{
+            //     if (index%2 == 0){
+            //         stateFlatCoordinates.push(element+e.delta[0]);
+            //     }else{
+            //         stateFlatCoordinates.push(element+e.delta[1]);
+            //     }
+            // })
+            // e.feature.values_['state'].flatCoordinates = stateFlatCoordinates;
+
+            // let transitionFlatCoordinates = [];
+            // e.feature.values_['transition'].flatCoordinates.map((element,index)=>{
+            //     if (index%2 == 0){
+            //         transitionFlatCoordinates.push(element+e.delta[0]);
+            //     }else{
+            //         transitionFlatCoordinates.push(element+e.delta[1]);
+            //     }
+            // })
+            // e.feature.values_['transition'].flatCoordinates = transitionFlatCoordinates;
+            
+            //console.log(e);
+        });
+
         this.map.addInteraction(this.interaction);
 
 
@@ -81,18 +156,38 @@ export default class {
 
     getCoordinatesFromSelectedFeatures(){
         if(this.selectedFeature == undefined) return undefined;
-        
-        let flatCoordinates = this.selectedFeature.values_.geometry.flatCoordinates;
-        let ends_ = this.selectedFeature.values_.geometry.ends_;
+        let featureTypeArray = ['cellspace','transition'];
+        let converted_features = {};
+        featureTypeArray.map((feature)=>{
+            let flatCoordinates = this.selectedFeature.values_[feature].flatCoordinates;
+            let ends_ = this.selectedFeature.values_[feature].ends_;
+            let converted_coordinate_array = new Array();
 
+            for (let index = 0; index < ends_.length; index++) {
+                const rare_element = index == 0 ? index : ends_[index-1];
+                const element = ends_[index];
+                let temp_array = flatCoordinates.slice(rare_element,element);
+                converted_coordinate_array.push(temp_array.division(2));
+            }
+            converted_features[feature] = converted_coordinate_array;
+        })
         let converted_coordinate_array = new Array();
-        for (let index = 0; index < ends_.length; index++) {
-            const rare_element = index == 0 ? index : ends_[index-1];
-            const element = ends_[index];
-            let temp_array = flatCoordinates.slice(rare_element,element);
-            converted_coordinate_array.push(temp_array.division(2));
-        }
-        return converted_coordinate_array;
+        //converted_coordinate_array.push(this.selectedFeature.values_.state.flatCoordinates.division(2));
+        converted_features['state'] = this.selectedFeature.values_.state.flatCoordinates.division(2);
+
+        return converted_features;
+
+        // let flatCoordinates = this.selectedFeature.values_.cellspace.flatCoordinates;
+        // let ends_ = this.selectedFeature.values_.cellspace.ends_;
+
+        // let converted_coordinate_array = new Array();
+        // for (let index = 0; index < ends_.length; index++) {
+        //     const rare_element = index == 0 ? index : ends_[index-1];
+        //     const element = ends_[index];
+        //     let temp_array = flatCoordinates.slice(rare_element,element);
+        //     converted_coordinate_array.push(temp_array.division(2));
+        // }
+        //return converted_coordinate_array;
     }
 
     drawPolygons(coordinateJSON) {
@@ -191,76 +286,61 @@ export default class {
     }
 
     test(){
+        let aaa = [];
+        
+        aaa.push(new Point([14367025.80544415, 4195356.01356387]));
+        aaa.push(new Point([14369739.31994827, 4196043.94681844]));
+
+        let bbb = new Point([14367025.80544415, 4195356.01356387]);
+        let ccc = new Point([14369739.31994827, 4196043.94681844]);
+        //console.log(bbb);
+        
+
         const point = new Feature({
             name: 'point',
-            geometry: new Point([ 14367025.80544415, 4195356.01356387 ])
+            geometry: new MultiPoint([[14367025.80544415, 4195356.01356387],[14369739.31994827, 4196043.94681844]])
           })
-          const line = new Feature({
-            name: 'line',
-            geometry: new LineString([ [ 14369739.31994827, 4196043.94681844 ], [ 14369225.75866448, 4195241.35802144 ] ])
-          })
-          const polygon = new Feature({
-            name: 'polygon',
-            geometry: new Polygon([
-                [
-                    [14367676.71451314, 4195137.45143612],
-                    [14367628.94137046, 4194860.36720858],
-                    [14368331.20656783, 4194688.38389494],
-                    [14368536.63108135, 4195209.11115013]
-                ]
-            ]),
-            point: new Point([ 14367025.80544415, 4195356.01356387 ])
-          })
-        
-        //console.log(polygon.getGeometry().flatCoordinates);
           
 
         const testLayer = new VectorLayer({
             source: new VectorSource({
                 projection: 'EPSG:33857',
-                features: [ polygon]
+                features: [ point]
               })
         })
 
         this.map.addLayer(testLayer);
-        
-        
-        var interaction = new Transform({
-            enableRotatedTransform: false,
-            /* Limit interaction inside bbox * /
-            condition: function(e, features) {
-              return ol.extent.containsXY([-465960, 5536486, 1001630, 6514880], e.coordinate[0], e.coordinate[1]);
-            },
-            /* */
-            addCondition: shiftKeyOnly,
-            // filter: function(f,l) { return f.getGeometry().getType()==='Polygon'; },
-            // layers: [vector],
-            hitTolerance: 2,
-            translateFeature: true,
-            scale: true,
-            rotate: true,
-            keepAspectRatio: undefined,
-            translate: true,
-            stretch: true
-          });
-
-          
-        this.map.addInteraction(interaction);
-        
-        // this.map.on('rendercomplete', ()=> {
-        //     let pixel = this.map.getSize();
-        //     this.centerPixel = [pixel[0]/2,pixel[1]/2];
-        //     this.centerCoordinate = this.map.getCoordinateFromPixel(centerPixel);
-        //     console.log(this.centerCoordinate);
-        // });
+    
     }
 
-    drawIndoorGML(indoorVectorArray){
-        //console.log(indoorVectorArray);
+    drawIndoorGML(indoorVectors){
+        // console.log(indoorVectors.polygons_array);
         
+        // indoorVectors.polygons_array.map(array=>{
+        //     array.map(element=>{
+                
+        //     })
+        // })
+
         const polygon = new Feature({
-            name: 'polygon',
-            geometry: new Polygon(indoorVectorArray)
+            name: 'indoorGML',
+            cellspace: new Polygon(indoorVectors.polygons_array),
+            state: new MultiPoint(indoorVectors.state_array),
+            transition: new MultiLineString(indoorVectors.transitions_array),            
+        })
+        // polygon.setGeometryName('state');
+        // polygon.setGeometryName('transition');
+        // polygon.setGeometryName('cellspace');
+
+
+        document.getElementById('change_mode').addEventListener('click',()=>{
+            if (polygon.getGeometryName() == 'cellspace') {
+                polygon.setGeometryName('state');
+            }else if (polygon.getGeometryName() == 'state') {
+                polygon.setGeometryName('transition');
+            }else if (polygon.getGeometryName() == 'transition') {
+                polygon.setGeometryName('cellspace');
+            }
         })
 
         const indoorLayer = new VectorLayer({
@@ -271,11 +351,59 @@ export default class {
         })
         //polygon.getGeometry().translate(this.centerCoordinate[0]-indoorVectorArray[0][0][0],this.centerCoordinate[1]-indoorVectorArray[0][0][1])
         this.map.setView(new View({
-            center: [indoorVectorArray[0][0][0],indoorVectorArray[0][0][1]],
+            center: [indoorVectors.polygons_array[0][0][0],indoorVectors.polygons_array[0][0][1]],
             zoom: 18
         }))
 
         this.map.addLayer(indoorLayer);
+
+        polygon.setGeometryName('state');
+        polygon.setGeometryName('transition');
+        polygon.setGeometryName('cellspace');
+
+        const labelCoords = new Feature({
+            name: 'point',
+            geometry: new Point([ 14367025.80544415, 4195356.01356387 ])
+          })
+          const line = new Feature({
+            name: 'line',
+            geometry: new LineString([ [ 14369739.31994827, 4196043.94681844 ], [ 14369225.75866448, 4195241.35802144 ] ])
+          })
+          const polyCoords = new Feature({
+            name: 'polygon',
+            geometry: new Polygon([
+                [
+                    [14367676.71451314, 4195137.45143612],
+                    [14367628.94137046, 4194860.36720858],
+                    [14368331.20656783, 4194688.38389494],
+                    [14368536.63108135, 4195209.11115013]
+                ]
+            ])
+          })
+
+        // var feature = new Feature({
+        //     geometry: new Polygon( [
+        //         [14367676.71451314, 4195137.45143612],
+        //         [14367628.94137046, 4194860.36720858],
+        //         [14368331.20656783, 4194688.38389494],
+        //         [14368536.63108135, 4195209.11115013]
+        //     ]),
+        //     labelPoint: new Point([ 14367025.80544415, 4195356.01356387 ]),
+        //     name: 'My Polygon'
+        //   });
+          
+        //   // get the polygon geometry
+        //   var poly = feature.getGeometry();
+        //   console.log(poly);
+          
+        //   // Render the feature as a point using the coordinates from labelPoint
+        //   feature.setGeometryName('labelPoint');
+          
+        //   // get the point geometry
+        //   var point = feature.getGeometry();
+        //   console.log(point);
     }
+
+    
 
 }
