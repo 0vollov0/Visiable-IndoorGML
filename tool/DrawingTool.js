@@ -85,12 +85,29 @@ export default class {
 
         this.interaction.on('scaleend',(e)=>{
             let featureTypeArray = ['cellspace','state','transition'];
+            let idx = featureTypeArray.indexOf(e.feature.geometryName_);
+            featureTypeArray.splice(idx,1);
+
             featureTypeArray.map((feature)=>{
-                if (feature != e.feature.geometryName_) {
-                    e.feature.values_[feature].scale(scale[0],scale[1]);
-                }               
+                let ratio = e.feature.values_.translate_ratio[e.feature.geometryName_][feature];
+                e.feature.values_[feature].scale(scale[0],scale[1]);
+
+                let test1 = e.feature.values_[e.feature.geometryName_].extent_[0] * ratio[0];
+                let test2 = e.feature.values_[e.feature.geometryName_].extent_[1] * ratio[1];
+
+                test1 = e.feature.values_[feature].extent_[0]-test1;
+                test2 = e.feature.values_[feature].extent_[1]-test2;
+                console.log(test1);
+                console.log(test2);
+                
+                //e.feature.values_[feature].translate(test1,test2);
+
+                // if (feature != e.feature.geometryName_) {
+                //     e.feature.values_[feature].scale(scale[0],scale[1]);
+                // }               
             })
         })
+
 
         this.interaction.on('rotating',(e) => {
             angle = e.angle;
@@ -121,12 +138,12 @@ export default class {
             //console.log(delta+'sss');
             
             let featureTypeArray = ['cellspace','state','transition'];
+            let idx = featureTypeArray.indexOf(e.feature.geometryName_);
+            featureTypeArray.splice(idx,1);
+
             featureTypeArray.map((feature)=>{
-                if (feature != e.feature.geometryName_) {
-                    e.feature.values_[feature].translate(delta[0],delta[1]);
-                }
+                e.feature.values_[feature].translate(delta[0],delta[1]);
             })
-            console.log(delta);
             
 
             //delta = [0,0];
@@ -252,38 +269,6 @@ export default class {
         this.map.addLayer(vectorLayer);
     }
 
-    removeCircle() {
-        this.map.removeLayer(this.circleLayerArray.pop());
-    }
-
-    removePolygons(){
-        this.polygonsLayerArray.forEach(element => {
-            this.map.removeLayer(element);
-        });
-    }
-
-    initialize(containPolygonsFlag){
-        this.circleLayerArray.forEach(element => {
-            this.map.removeLayer(element);
-        });
-        this.circleLayerArray = new Array();
-        this.userClickedPointsView.innerHTML = '';
-
-        if(containPolygonsFlag) this.removePolygons();
-    }
-
-    integrityCircleData() {
-        if (this.circleLayerArray.length > 3 || this.userClickedPointsView.children.length > 3) {
-            for (let index = 0; index < this.circleLayerArray.length - 3; index++) {
-                this.map.removeLayer(this.circleLayerArray[0]);
-            }
-            this.circleLayerArray = this.circleLayerArray.slice(0, 4).slice(1);
-            while (this.userClickedPointsView.children.length > 3) {
-                this.userClickedPointsView.removeChild(this.userClickedPointsView.children[0]);
-            }
-        }
-    }
-
     test(){
         let aaa = [];
         
@@ -363,6 +348,38 @@ export default class {
         polygon.setGeometryName('state');
         polygon.setGeometryName('transition');
         polygon.setGeometryName('cellspace');
+        
+        const cellspace_extent = polygon.values_.cellspace.extent_;
+        const transition_extent = polygon.values_.transition.extent_;
+        const state_extent = polygon.values_.state.extent_;
+        
+        let translate_ratio = {};
+        translate_ratio.cellspace = {
+            'state' : [cellspace_extent[0]/state_extent[0],cellspace_extent[1]/state_extent[1]],
+            'transition' : [cellspace_extent[0]/transition_extent[0],cellspace_extent[1]/transition_extent[1]]
+        }
+        // translate_ratio.cellspace = {
+        //     'state' : [state_extent[0]/cellspace_extent[0],state_extent[1]/cellspace_extent[1]],
+        //     'transition' : [transition_extent[0]/cellspace_extent[0],transition_extent[1]/cellspace_extent[1]]
+        // }
+        translate_ratio.transition ={
+            'state' : [transition_extent[0]/state_extent[0],transition_extent[1]/state_extent[1]],
+            'cellspace' : [transition_extent[0]/cellspace_extent[0],transition_extent[1]/cellspace_extent[1]]
+        }
+        translate_ratio.state ={
+            'transition' : [state_extent[0]/transition_extent[0],state_extent[1]/transition_extent[1]],
+            'cellspace' : [state_extent[0]/cellspace_extent[0],state_extent[1]/cellspace_extent[1]]
+        }
+
+        polygon.set('translate_ratio',translate_ratio);
+        //console.log(translate_ratio.cellspace['state']);
+        
+        
+        
+        // polygon.values_.state.extent_ = polygon.values_.cellspace.extent_;
+        // polygon.values_.transition.extent_ = polygon.values_.cellspace.extent_;
+        
+        
 
         const labelCoords = new Feature({
             name: 'point',
@@ -410,3 +427,5 @@ export default class {
     
 
 }
+
+
