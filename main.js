@@ -139,7 +139,7 @@ map.addControl(mousePositionCtrl);
 //     console.log(e);
 // })
 
-drawingTool.test();
+//drawingTool.test();
 
   
 

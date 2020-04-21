@@ -33,13 +33,15 @@ Array.prototype.division = function (n) {
     return tmp;
 }
 
+let scale;
+let angle;
+let delta = [0,0];
 export default class {
     constructor(map,userClickedPointsView) {
         this.map = map;
         this.circleLayerArray = new Array();
         this.polygonsLayerArray = new Array();
         this.userClickedPointsView = userClickedPointsView;
-        //this.featureTypeArray = ['cellspace','state','transition'];
 
         this.interaction = new Transform({
             enableRotatedTransform: false,
@@ -69,71 +71,68 @@ export default class {
             
         });
 
-        this.interaction.on('rotating',(e) => {
-            //$('#info').text("rotate: "+((e.angle*180/Math.PI -180)%360+180).toFixed(2)); 
-            // Set angle attribute to be used on style !
-            //e.feature.set('angle', startangle - e.angle);
+        this.interaction.on (['rotatestart','translatestart'], function(e){
+            // Rotation
+            angle = 0.0;
+            // Translation
+            delta=[0,0];
+            scale =[0,0];
+          });
 
-            console.log(e);
-            
+        this.interaction.on('scaling', function (e){
+            scale = e.scale;
         });
+
+        this.interaction.on('scaleend',(e)=>{
+            let featureTypeArray = ['cellspace','state','transition'];
+            featureTypeArray.map((feature)=>{
+                if (feature != e.feature.geometryName_) {
+                    e.feature.values_[feature].scale(scale[0],scale[1]);
+                }               
+            })
+        })
+
+        this.interaction.on('rotating',(e) => {
+            angle = e.angle;
+        });
+
+        this.interaction.on('rotateend',(e)=>{
+            let featureTypeArray = ['cellspace','state','transition'];
+            featureTypeArray.map((feature)=>{
+                if (feature != e.feature.geometryName_) {
+                    e.feature.values_[feature].rotate(angle,e.target.center_);
+                }               
+            })
+        })
 
         this.interaction.on('translating', function (e){
-            // d[0]+=e.delta[0];
-            // d[1]+=e.delta[1];
-            // $('#info').text("translate: "+d[0].toFixed(2)+","+d[1].toFixed(2)); 
-            // if (firstPoint) {
-            //     interaction.setCenter(e.features.getArray()[0].getGeometry().getFirstCoordinate());
-            // }
+            delta[0] += e.delta[0];
+            delta[1] += e.delta[1];
+            //console.log(delta);
+            // let featureTypeArray = ['cellspace','state','transition'];
+            // featureTypeArray.map((feature)=>{
+            //     if (feature != e.feature.geometryName_) {
+            //         e.feature.values_[feature].translate(e.delta[0],e.delta[1]);
+            //     }
+            // })
+        });
+
+        this.interaction.on('translateend', function (e){
+            //console.log(delta+'sss');
+            
             let featureTypeArray = ['cellspace','state','transition'];
-            
-            
             featureTypeArray.map((feature)=>{
-                
                 if (feature != e.feature.geometryName_) {
-                    console.log(feature);
-                    let newFlatCoordinates = [];
-                    e.feature.values_[feature].flatCoordinates.map((element,index)=>{
-                        if (index%2 == 0){
-                            newFlatCoordinates.push(element+e.delta[0]);
-                        }else{
-                            newFlatCoordinates.push(element+e.delta[1]);
-                        }
-                    })
-                    e.feature.values_[feature].flatCoordinates = newFlatCoordinates;
-                    e.feature.values_[feature].orientedFlatCoordinates_ = newFlatCoordinates;
-                    e.feature.values_[feature].extent_[0] += e.delta[0];
-                    e.feature.values_[feature].extent_[1] += e.delta[1];
-                    e.feature.values_[feature].extent_[2] += e.delta[0];
-                    e.feature.values_[feature].extent_[3] += e.delta[1];
+                    e.feature.values_[feature].translate(delta[0],delta[1]);
                 }
             })
-            
-            
+            console.log(delta);
             
 
-            // let stateFlatCoordinates = [];
-            // e.feature.values_['state'].flatCoordinates.map((element,index)=>{
-            //     if (index%2 == 0){
-            //         stateFlatCoordinates.push(element+e.delta[0]);
-            //     }else{
-            //         stateFlatCoordinates.push(element+e.delta[1]);
-            //     }
-            // })
-            // e.feature.values_['state'].flatCoordinates = stateFlatCoordinates;
-
-            // let transitionFlatCoordinates = [];
-            // e.feature.values_['transition'].flatCoordinates.map((element,index)=>{
-            //     if (index%2 == 0){
-            //         transitionFlatCoordinates.push(element+e.delta[0]);
-            //     }else{
-            //         transitionFlatCoordinates.push(element+e.delta[1]);
-            //     }
-            // })
-            // e.feature.values_['transition'].flatCoordinates = transitionFlatCoordinates;
-            
-            //console.log(e);
+            //delta = [0,0];
         });
+
+
 
         this.map.addInteraction(this.interaction);
 
@@ -301,6 +300,10 @@ export default class {
             geometry: new MultiPoint([[14367025.80544415, 4195356.01356387],[14369739.31994827, 4196043.94681844]])
           })
           
+        
+        //point.values_.geometry.rotate(-1.4854454989904224,[14368378.53899116, 4195695.77489704]);
+        point.values_.geometry.rotate(-1.4854454989904224,[14368383.07198703, 4195692.124328678]);
+        
 
         const testLayer = new VectorLayer({
             source: new VectorSource({
