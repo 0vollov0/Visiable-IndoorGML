@@ -84,28 +84,74 @@ export default class {
         });
 
         this.interaction.on('scaleend',(e)=>{
+            let targetFeaure = typeof e.feature.geometryName_ == 'string' ? e.feature.geometryName_ : e.feature.geometryName_[0];
+            //console.log(targetFeaure);
+            
             let featureTypeArray = ['cellspace','state','transition'];
-            let idx = featureTypeArray.indexOf(e.feature.geometryName_);
+            //console.log(featureTypeArray);
+            
+            let idx = featureTypeArray.indexOf(targetFeaure);
+            //console.log(idx);
+            
             featureTypeArray.splice(idx,1);
-
+            //console.log(targetFeaure);
             featureTypeArray.map((feature)=>{
-                let ratio = e.feature.values_.translate_ratio[e.feature.geometryName_][feature];
+                console.log(feature);
+                
+                //console.log(e.feature.values_[e.feature.geometryName_].extent_);
+                // this.promiseScale(feature.values_[feature],scale).then((data)=>{
+                //     console.log(data);
+                    
+                //     //console.log(e.feature.values_[e.feature.geometryName_].extent_);
+                // })
+                //console.log(e.feature.values_[feature].extent_);
                 e.feature.values_[feature].scale(scale[0],scale[1]);
+                e.feature.setGeometryName(feature);
+                //console.log(e.feature.values_[feature].extent_);
+                
+                //console.log(e.feature.values_[feature].scale(scale[0],scale[1]));
+                
+                
+                let targetCenter = [(e.feature.values_[targetFeaure].extent_[0]+e.feature.values_[targetFeaure].extent_[2])/2,(e.feature.values_[targetFeaure].extent_[1]+e.feature.values_[targetFeaure].extent_[3])/2];
+                let otherModCenter = [(e.feature.values_[feature].extent_[0]+e.feature.values_[feature].extent_[2])/2,(e.feature.values_[feature].extent_[1]+e.feature.values_[feature].extent_[3])/2];
+                //console.log(targetCenter);
+                //console.log(otherModCenter);
+                
+                let ratio = e.feature.values_.translate_ratio[targetFeaure][feature];
+                let test1 = targetCenter[0] * ratio[0];
+                let test2 = targetCenter[1] * ratio[1];
 
-                let test1 = e.feature.values_[e.feature.geometryName_].extent_[0] * ratio[0];
-                let test2 = e.feature.values_[e.feature.geometryName_].extent_[1] * ratio[1];
+                console.log('test1 ' + test1);
+                console.log('test2 ' + test2);
+                console.log(targetCenter);
+                
+                console.log(otherModCenter);
+                
 
-                test1 = e.feature.values_[feature].extent_[0]-test1;
-                test2 = e.feature.values_[feature].extent_[1]-test2;
+                test1 =  otherModCenter[0] >= test1 ? otherModCenter[0] - test1 : test1 - otherModCenter[0];
+                test2 =  otherModCenter[1] >= test2 ? otherModCenter[1] - test2 : test2 - otherModCenter[1];
+
                 console.log(test1);
                 console.log(test2);
                 
-                //e.feature.values_[feature].translate(test1,test2);
+                let abc = [];
+                abc[0] = targetCenter[0] >= otherModCenter[0] ? targetCenter[0] - otherModCenter[0] : otherModCenter[0] - targetCenter[0];
+                abc[1] = targetCenter[1] >= otherModCenter[1] ? targetCenter[1] - otherModCenter[1] : otherModCenter[1] - targetCenter[1];
+
+                //console.log(test1);
+                //console.log(test2);
+
+
+                e.feature.values_[feature].translate(abc[0],abc[1]);
+                //console.log([(e.feature.values_[feature].extent_[0]+e.feature.values_[feature].extent_[2])/2,(e.feature.values_[feature].extent_[1]+e.feature.values_[feature].extent_[3])/2]);
+                
+                
 
                 // if (feature != e.feature.geometryName_) {
                 //     e.feature.values_[feature].scale(scale[0],scale[1]);
-                // }               
+                // }
             })
+            e.feature.setGeometryName(targetFeaure);
         })
 
 
@@ -168,6 +214,13 @@ export default class {
         })
 
         this.map.addInteraction(this.select);
+    }
+    
+    promiseScale(feature,scale){
+        return new Promise((resolve, reject) => {
+            feature.scale(scale[0], scale[1]);
+            resolve(true);
+        });
     }
 
     getCoordinatesFromSelectedFeatures(){
@@ -316,9 +369,7 @@ export default class {
             state: new MultiPoint(indoorVectors.state_array),
             transition: new MultiLineString(indoorVectors.transitions_array),            
         })
-        // polygon.setGeometryName('state');
-        // polygon.setGeometryName('transition');
-        // polygon.setGeometryName('cellspace');
+        
 
 
         document.getElementById('change_mode').addEventListener('click',()=>{
@@ -352,23 +403,34 @@ export default class {
         const cellspace_extent = polygon.values_.cellspace.extent_;
         const transition_extent = polygon.values_.transition.extent_;
         const state_extent = polygon.values_.state.extent_;
-        
+
+        const cellspace_center = [(cellspace_extent[2]+cellspace_extent[0])/2,(cellspace_extent[1]+cellspace_extent[3])/2];
+        const transition_center = [(transition_extent[2]+transition_extent[0])/2,(transition_extent[1]+transition_extent[3])/2];
+        const state_center = [(state_extent[2]+state_extent[0])/2,(state_extent[1]+state_extent[3])/2];
+
         let translate_ratio = {};
+
+        console.log((cellspace_extent[2]+cellspace_extent[0])/2);
+        console.log((cellspace_extent[1]+cellspace_extent[3])/2);
+        console.log(polygon);
+        
+        //polygon.values_.state.translate(cellspace_extent[0]-state_extent[0],cellspace_extent[1]-state_extent[1]);
+
         translate_ratio.cellspace = {
-            'state' : [cellspace_extent[0]/state_extent[0],cellspace_extent[1]/state_extent[1]],
-            'transition' : [cellspace_extent[0]/transition_extent[0],cellspace_extent[1]/transition_extent[1]]
+            'state' : [cellspace_center[0]/state_center[0],cellspace_center[1]/state_center[1]],
+            'transition' : [cellspace_center[0]/transition_center[0],cellspace_center[1]/transition_center[1]]
         }
         // translate_ratio.cellspace = {
         //     'state' : [state_extent[0]/cellspace_extent[0],state_extent[1]/cellspace_extent[1]],
         //     'transition' : [transition_extent[0]/cellspace_extent[0],transition_extent[1]/cellspace_extent[1]]
         // }
         translate_ratio.transition ={
-            'state' : [transition_extent[0]/state_extent[0],transition_extent[1]/state_extent[1]],
-            'cellspace' : [transition_extent[0]/cellspace_extent[0],transition_extent[1]/cellspace_extent[1]]
+            'state' : [transition_center[0]/state_center[0],transition_center[1]/state_center[1]],
+            'cellspace' : [transition_center[0]/cellspace_center[0],transition_center[1]/cellspace_center[1]]
         }
         translate_ratio.state ={
-            'transition' : [state_extent[0]/transition_extent[0],state_extent[1]/transition_extent[1]],
-            'cellspace' : [state_extent[0]/cellspace_extent[0],state_extent[1]/cellspace_extent[1]]
+            'transition' : [state_center[0]/transition_center[0],state_center[1]/transition_center[1]],
+            'cellspace' : [state_center[0]/cellspace_center[0],state_center[1]/cellspace_center[1]]
         }
 
         polygon.set('translate_ratio',translate_ratio);
