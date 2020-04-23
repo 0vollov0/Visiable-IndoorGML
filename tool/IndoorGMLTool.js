@@ -6,18 +6,8 @@ export default class {
         this.primalSpaceFeatures = null;
         this.cellSpaceMember_array = [];
         this.linearRing_array = [];
-        //this.polygons_array = [];
     }
 
-    // readFile = (file) => {
-    //     var reader = new FileReader();
-    //     reader.onload = () => {
-    //         readed_indoorGML = reader.result;
-    //         console.log(readed_indoorGML);
-            
-    //     }
-    //     reader.readAsText(file,"euc-kr");
-    // }
     convertIndoorGMLVector(file,coordinateFromSelectedFeatures){
         return new Promise((resolve,reject)=>{
             var reader = new FileReader();
