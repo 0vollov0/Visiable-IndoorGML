@@ -11,7 +11,7 @@ export default class {
     convertIndoorGMLVector(file,coordinateFromSelectedFeatures){
         return new Promise((resolve,reject)=>{
             var reader = new FileReader();
-            reader.readAsText(file,"euc-kr");
+            reader.readAsText(file,"utf-8");
 
             reader.onload = () => {
                 this.readed_indoorGML = reader.result;
@@ -107,7 +107,7 @@ export default class {
     getIndoorGMLVectorArray(file){
         return new Promise((resolve,reject)=>{
             var reader = new FileReader();
-            reader.readAsText(file,"euc-kr");
+            reader.readAsText(file,"utf-8");
             let polygons_array = [];
             let state_array = [];
             let transitions_array = [];

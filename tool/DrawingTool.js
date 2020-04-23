@@ -34,6 +34,8 @@ Array.prototype.division = function (n) {
 let scale;
 let angle;
 let delta = [0,0];
+// Handle rotate on first point
+let firstPoint = false;
 export default class {
     constructor(map,userClickedPointsView) {
         this.map = map;
@@ -63,14 +65,14 @@ export default class {
         document.getElementById('change_mode').addEventListener('click',()=>{
             if(this.selectedFeature == undefined) return;
             if (this.selectedFeature.getGeometryName() == 'cellspace') {
+                this.popExtentCoordinates(this.selectedFeature.values_.state);
                 this.selectedFeature.setGeometryName('state');
-                //this.popExtentCoordinates(indoorGML.values_.state);
             }else if (this.selectedFeature.getGeometryName() == 'state') {
+                this.popExtentCoordinates(this.selectedFeature.values_.transition);
                 this.selectedFeature.setGeometryName('transition');
-                //this.popExtentCoordinates(indoorGML.values_.transition);
             }else if (this.selectedFeature.getGeometryName() == 'transition') {
+                this.pushExtentCoordinates(this.selectedFeature);
                 this.selectedFeature.setGeometryName('cellspace');
-                //this.pushExtentCoordinates(indoorGML);
             }
         })
         
@@ -83,13 +85,25 @@ export default class {
         });
 
         this.interaction.on (['rotatestart','translatestart'], function(e){
-            pushExtentCoordinates(e.feature);
-            // Rotation
-            angle = 0.0;
             // Translation
             delta=[0,0];
             scale =[0,0];
-          });
+        });
+
+        this.interaction.on (['rotatestart'], function(e){
+            // Rotation
+            angle = 0.0;
+            for (let index = 0; index < 4; index++) {
+                e.feature.values_.state.flatCoordinates.pop();
+                e.feature.values_.transition.flatCoordinates.pop();
+            }
+            let targetFeaure = typeof e.feature.geometryName_ == 'string' ? e.feature.geometryName_ : e.feature.geometryName_[0];
+            e.feature.setGeometryName('state');
+            e.feature.setGeometryName('transition');
+            e.feature.setGeometryName('cellspace');
+            e.feature.setGeometryName(targetFeaure);
+
+        });
 
         this.interaction.on('scaling', function (e){
             scale = e.scale;
@@ -109,6 +123,8 @@ export default class {
 
         this.interaction.on('rotating',(e) => {
             angle = e.angle;
+            console.log(this.interaction.getCenter());
+            
         });
 
         this.interaction.on('rotateend',(e)=>{
@@ -117,9 +133,36 @@ export default class {
             let idx = featureTypeArray.indexOf(targetFeaure);
             
             featureTypeArray.splice(idx,1);
+            console.log([(e.feature.values_[targetFeaure].extent_[0]+e.feature.values_[targetFeaure].extent_[2])/2,(e.feature.values_[targetFeaure].extent_[1]+e.feature.values_[targetFeaure].extent_[2])/2]);
             featureTypeArray.map((feature)=>{
+                //console.log(e.target.center_);
+                //console.log([(e.feature.values_[feature].extent_[0]+e.feature.values_[feature].extent_[2])/2,(e.feature.values_[feature].extent_[1]+e.feature.values_[feature].extent_[2])/2]);
+                
                 e.feature.values_[feature].rotate(angle,e.target.center_);             
+                
             })
+
+            e.feature.setGeometryName('state');
+            e.feature.setGeometryName('transition');
+            e.feature.setGeometryName('cellspace');
+
+            const cellspace_extent = e.feature.values_.cellspace.extent_;
+
+            if (targetFeaure != 'cellspace') {
+                for (let index = 0; index < 4; index++) {
+                    e.feature.values_[targetFeaure].flatCoordinates.pop();
+                }
+            }
+            
+            e.feature.values_.state.appendPoint(new Point([cellspace_extent[0],cellspace_extent[1]]));
+            e.feature.values_.state.appendPoint(new Point([cellspace_extent[2],cellspace_extent[3]]));
+            e.feature.values_.transition.appendLineString(new LineString([[cellspace_extent[0],cellspace_extent[1]],[cellspace_extent[2],cellspace_extent[3]]]));
+
+            e.feature.setGeometryName('state');
+            e.feature.setGeometryName('transition');
+            e.feature.setGeometryName('cellspace');
+
+            e.feature.setGeometryName(targetFeaure);
         })
 
         this.interaction.on('translating', function (e){
@@ -128,6 +171,7 @@ export default class {
         });
 
         this.interaction.on('translateend', function (e){
+            //pushExtentCoordinates(e.feature);
             let targetFeaure = typeof e.feature.geometryName_ == 'string' ? e.feature.geometryName_ : e.feature.geometryName_[0];
             let featureTypeArray = ['cellspace','state','transition'];
             let idx = featureTypeArray.indexOf(targetFeaure);
@@ -162,13 +206,6 @@ export default class {
         this.map.addInteraction(this.select);
     }
     
-    promiseScale(feature,scale){
-        return new Promise((resolve, reject) => {
-            feature.scale(scale[0], scale[1]);
-            resolve(true);
-        });
-    }
-
     getCoordinatesFromSelectedFeatures(){
         if(this.selectedFeature == undefined) return undefined;
 
@@ -228,7 +265,7 @@ export default class {
         });
     }
 
-    drawIndoorGML(indoorVectors){
+    drawIndoorGML(indoorGMLFile,indoorVectors){
         const indoorGML = new Feature({
             name: 'indoorGML',
             cellspace: new Polygon(indoorVectors.polygons_array),
@@ -250,17 +287,29 @@ export default class {
 
         this.map.addLayer(indoorLayer);
         
+        indoorGML.setGeometryName('state');
+        indoorGML.setGeometryName('transition');
         indoorGML.setGeometryName('cellspace');
+        indoorGML.set('indoorGMLFile',indoorGMLFile);
         
         const cellspace_extent = indoorGML.values_.cellspace.extent_;
+        
         
         indoorGML.values_.state.appendPoint(new Point([cellspace_extent[0],cellspace_extent[1]]));
         indoorGML.values_.state.appendPoint(new Point([cellspace_extent[2],cellspace_extent[3]]));
         indoorGML.values_.transition.appendLineString(new LineString([[cellspace_extent[0],cellspace_extent[1]],[cellspace_extent[2],cellspace_extent[3]]]));
+        indoorGML.values_.state.extent_ = cellspace_extent;
+        indoorGML.values_.transition.extent_ = cellspace_extent;
+    }
+
+    getSelectedFeatureFile(){
+        if(this.selectedFeature == undefined) return null;
+        return this.selectedFeature.values_.indoorGMLFile;
     }
 
     popExtentCoordinates(geometry){
         for (let index = 0; index < 4; index++) {
+            //console.log(geometry.flatCoordinates.pop());
             geometry.flatCoordinates.pop();
         }
     }
@@ -272,7 +321,5 @@ export default class {
         feature.values_.transition.appendLineString(new LineString([[cellspace_extent[0],cellspace_extent[1]],[cellspace_extent[2],cellspace_extent[3]]]));
     }
 }
-
-
 
 
