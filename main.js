@@ -44,7 +44,7 @@ const map = new Map({
     ],
     view: new View({
         center: fromLonLat([129.0827, 35.2325]),
-        zoom: 20
+        zoom: 16
     })
     
 });
@@ -60,6 +60,4 @@ let mousePositionCtrl = new MousePosition({
 });
 
 map.addControl(mousePositionCtrl);
-
-  
 

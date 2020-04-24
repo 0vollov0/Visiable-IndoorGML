@@ -14,7 +14,7 @@ import MultiPoint from 'ol/geom/MultiPoint';
 import LineString from 'ol/geom/LineString'
 import MultiLineString from 'ol/geom/MultiLineString';
 import { View} from 'ol';
-import {shiftKeyOnly,altKeyOnly} from 'ol/events/condition';
+import {shiftKeyOnly,altKeyOnly, always} from 'ol/events/condition';
 import Transform from 'ol-ext/interaction/Transform';
 import Select from 'ol/interaction/Select';
 
@@ -65,13 +65,13 @@ export default class {
         document.getElementById('change_mode').addEventListener('click',()=>{
             if(this.selectedFeature == undefined) return;
             if (this.selectedFeature.getGeometryName() == 'cellspace') {
-                this.popExtentCoordinates(this.selectedFeature.values_.state);
+                //this.popExtentCoordinates(this.selectedFeature.values_.state);
                 this.selectedFeature.setGeometryName('state');
             }else if (this.selectedFeature.getGeometryName() == 'state') {
-                this.popExtentCoordinates(this.selectedFeature.values_.transition);
+                //this.popExtentCoordinates(this.selectedFeature.values_.transition);
                 this.selectedFeature.setGeometryName('transition');
             }else if (this.selectedFeature.getGeometryName() == 'transition') {
-                this.pushExtentCoordinates(this.selectedFeature);
+                //this.pushExtentCoordinates(this.selectedFeature);
                 this.selectedFeature.setGeometryName('cellspace');
             }
         })
@@ -79,9 +79,6 @@ export default class {
 
         this.interaction.on (['select'], (e) =>{
             this.selectedFeature = e.feature;
-            console.log(e);
-            console.log(this.selectedFeature);
-            
         });
 
         this.interaction.on (['rotatestart','translatestart'], function(e){
@@ -102,7 +99,6 @@ export default class {
             e.feature.setGeometryName('transition');
             e.feature.setGeometryName('cellspace');
             e.feature.setGeometryName(targetFeaure);
-
         });
 
         this.interaction.on('scaling', function (e){
@@ -196,14 +192,14 @@ export default class {
             this.centerCoordinate = this.map.getCoordinateFromPixel(this.centerPixel);
         });
 
-        this.select = new Select({
-            condition: altKeyOnly,
-            filter: (feature, layer) => {
-                if (layer != null) layer.getSource().refresh();
-            }
-        })
+        // this.select = new Select({
+        //     condition: altKeyOnly
+        //     // filter: (feature, layer) => {
+        //     //     if (layer != null) layer.getSource().refresh();
+        //     // }
+        // })
 
-        this.map.addInteraction(this.select);
+        // this.map.addInteraction(this.select);
     }
     
     getCoordinatesFromSelectedFeatures(){
