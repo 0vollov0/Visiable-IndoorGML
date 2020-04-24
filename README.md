@@ -10,52 +10,62 @@ npm install
 npm start
 ```
 
-## 필요한 것
+```
+Port : 3000
+```
 
-visiable-indoorgml-convert-server
+## 필요한 것
 
 IndoorGML(.gml) file
 
 ## 사용법
 
-http://localhost:3000/ 접속
-
-indoorGML 데이터의 지도 좌표를 찍는다.
+IndoorGML file 입력
 
 ![1](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/1.PNG)
 
-지도 좌표와 대응되는 총 4개의 좌표가 필요합니다.
-
-
-* 가장 왼편에 있는 좌표
-
-* 가장 오른편에 있는 좌표
-
-* 가장 상단에 있는 좌표
-
-* 가장 하단에 있는 좌표 
-
-4개의 좌표 데이터를 찍었다면 Send 버튼을 누릅니다.
-
-visiable-indoorgml-convert-server에서 변환된 좌표값으로 지도에 indoorGML 구조를 표시합니다.
+#### 기능
 
 ![2](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/2.PNG)
 
-좌표 변환된 indoorGML 파일이 다운로드 됩니다.
+* Translate
 
-## 컨트롤
+* Scale
 
-MouseLeft : 지도상에 점을 찍습니다.
+* Rotate
 
-MouseRight : 가장 최근에 찍은 점을 삭제합니다.
+![3](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/3.PNG)
 
-Initialize button : 모든 상태를 초기화합니다.
+indoorGML Data Feature 에 매칭 되는 건물에 맞게 크기 및 위치를 수정해주세요.
 
-Send button : 유저가 표시한 점 좌표들과 IndoorGML 파일을 visiable-indoorgml-convert-server에 데이터를 보냅니다.
+Convert 버튼으로 조정된 위치 및 크기에 맞는 좌표 데이터를 새로운 파일로 다운 받을 수 있습니다.
+
+
+## 모드
+
+![4](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/4.PNG)
+
+![5](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/5.PNG)
+
+![6](https://github.com/0vollov0/Visiable-IndoorGML/blob/master/readme_image/6.PNG)
+
+총 3가지 모드가 존재 합니다.
+
+cellspace | state | transition
+
+## 주의
+
+* state | transition 모드 시에 오른쪽 상단 과 왼쪽 하단으로 이어지는 데이터는 좌표 변환시(Convert Button) 포함 되어 저장 되지 않습니다.
+
+* 해당 프로그램은 2D 입니다. 높이 값은 0 으로 표현되고 저장시에는 원본의 높이 값을 그대로 가지고 저장 됩니다.
 
 ## 테스트
 
 부산대학교 자연대 연구실험동 건물
+
+IndoorGML 파일 https://github.com/0vollov0/Visiable-IndoorGML/tree/master/IndoorGML 
+
+부산대학교 과확기술연구동
 
 IndoorGML 파일 https://github.com/0vollov0/Visiable-IndoorGML/tree/master/IndoorGML 
 
