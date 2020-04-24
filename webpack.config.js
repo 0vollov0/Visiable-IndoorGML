@@ -12,7 +12,8 @@ module.exports = {
   devServer: {
     port: 3000,
     clientLogLevel: 'none',
-    stats: 'errors-only'
+    stats: 'errors-only',
+    disableHostCheck: true
   },
   module: {
     rules: [
