@@ -305,7 +305,11 @@ export default class {
         indoorGML.values_.cellspace.translate(map_center[0]-indoorGML_center[0],map_center[1]-indoorGML_center[1]);
         indoorGML.values_.state.translate(map_center[0]-indoorGML_center[0],map_center[1]-indoorGML_center[1]);
         indoorGML.values_.transition.translate(map_center[0]-indoorGML_center[0],map_center[1]-indoorGML_center[1]);
-
+        
+        indoorGML.values_.state.appendPoint(new Point([cellspace_extent[0],cellspace_extent[1]]));
+        indoorGML.values_.state.appendPoint(new Point([cellspace_extent[2],cellspace_extent[3]]));
+        indoorGML.values_.transition.appendLineString(new LineString([[cellspace_extent[0],cellspace_extent[1]],[cellspace_extent[2],cellspace_extent[3]]]));
+        
         const indoorGML_width = cellspace_extent[2] - cellspace_extent[0];
         const indoorGML_heigth = cellspace_extent[3] - cellspace_extent[1];
         
@@ -316,9 +320,6 @@ export default class {
         indoorGML.values_.state.scale((map_width/indoorGML_width)/2,(map_heigth/indoorGML_heigth)/2);
         indoorGML.values_.transition.scale((map_width/indoorGML_width)/2,(map_heigth/indoorGML_heigth)/2);
         
-        indoorGML.values_.state.appendPoint(new Point([cellspace_extent[0],cellspace_extent[1]]));
-        indoorGML.values_.state.appendPoint(new Point([cellspace_extent[2],cellspace_extent[3]]));
-        indoorGML.values_.transition.appendLineString(new LineString([[cellspace_extent[0],cellspace_extent[1]],[cellspace_extent[2],cellspace_extent[3]]]));
         indoorGML.values_.state.extent_ = cellspace_extent;
         indoorGML.values_.transition.extent_ = cellspace_extent;
     }
