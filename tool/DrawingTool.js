@@ -188,8 +188,14 @@ export default class {
 
         this.map.on('rendercomplete', ()=> {
             let pixel = this.map.getSize();
-            this.centerPixel = [pixel[0]/2,pixel[1]/2];
-            this.centerCoordinate = this.map.getCoordinateFromPixel(this.centerPixel);
+            //this.centerPixel = [pixel[0]/2,pixel[1]/2];
+            //this.centerCoordinate = this.map.getCoordinateFromPixel(this.centerPixel);
+            console.log(this.map.previousExtent_[0]);
+            
+            //console.log(this.map.getCoordinateFromPixel(pixel));
+            
+            //console.log(this.map.getView());
+            //console.log(this.centerCoordinate);
         });
 
         // this.select = new Select({
@@ -269,18 +275,21 @@ export default class {
             transition: new MultiLineString(indoorVectors.transitions_array),            
         })
 
+        
+        
+        
         const indoorLayer = new VectorLayer({
             source: new VectorSource({
                 projection: 'EPSG:33857',
                 features: [indoorGML]
-              })
+            })
         })
-
-        this.map.setView(new View({
-            center: [indoorVectors.polygons_array[0][0][0],indoorVectors.polygons_array[0][0][1]],
-            zoom: 18
-        }))
-
+        
+        // this.map.setView(new View({
+        //     center: [indoorVectors.polygons_array[0][0][0],indoorVectors.polygons_array[0][0][1]],
+        //     zoom: 18
+        // }))
+        
         this.map.addLayer(indoorLayer);
         
         indoorGML.setGeometryName('state');
@@ -290,6 +299,22 @@ export default class {
         
         const cellspace_extent = indoorGML.values_.cellspace.extent_;
         
+        const map_center = this.map.getView().getCenter();
+        const indoorGML_center = [(cellspace_extent[0]+cellspace_extent[2])/2,(cellspace_extent[1]+cellspace_extent[3])/2];
+
+        indoorGML.values_.cellspace.translate(map_center[0]-indoorGML_center[0],map_center[1]-indoorGML_center[1]);
+        indoorGML.values_.state.translate(map_center[0]-indoorGML_center[0],map_center[1]-indoorGML_center[1]);
+        indoorGML.values_.transition.translate(map_center[0]-indoorGML_center[0],map_center[1]-indoorGML_center[1]);
+
+        const indoorGML_width = cellspace_extent[2] - cellspace_extent[0];
+        const indoorGML_heigth = cellspace_extent[3] - cellspace_extent[1];
+        
+        const map_width = this.map.previousExtent_[2] - this.map.previousExtent_[0];
+        const map_heigth = this.map.previousExtent_[3] - this.map.previousExtent_[1];
+        
+        indoorGML.values_.cellspace.scale((map_width/indoorGML_width)/2,(map_heigth/indoorGML_heigth)/2);
+        indoorGML.values_.state.scale((map_width/indoorGML_width)/2,(map_heigth/indoorGML_heigth)/2);
+        indoorGML.values_.transition.scale((map_width/indoorGML_width)/2,(map_heigth/indoorGML_heigth)/2);
         
         indoorGML.values_.state.appendPoint(new Point([cellspace_extent[0],cellspace_extent[1]]));
         indoorGML.values_.state.appendPoint(new Point([cellspace_extent[2],cellspace_extent[3]]));
@@ -317,5 +342,7 @@ export default class {
         feature.values_.transition.appendLineString(new LineString([[cellspace_extent[0],cellspace_extent[1]],[cellspace_extent[2],cellspace_extent[3]]]));
     }
 }
+
+
 
 

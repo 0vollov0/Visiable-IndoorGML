@@ -60,4 +60,8 @@ let mousePositionCtrl = new MousePosition({
 });
 
 map.addControl(mousePositionCtrl);
+console.log(map);
+
+console.log(map.getCoordinateFromPixel(map.centerPixel));
+
 
