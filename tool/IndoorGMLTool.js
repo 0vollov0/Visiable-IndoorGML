@@ -172,22 +172,23 @@ export default class {
 
                         // let nodes = spaceLayerMember['core:SpaceLayer'][0]['core:nodes'];
                         // let stateMemberList = nodes[0]['core:stateMember'];
-
-                        stateMemberList.map((stateMember)=>{
-                            let State = stateMember['core:State'] != undefined ? stateMember['core:State'][0] : stateMember['State'][0];
-                            let geometry = State['core:geometry'] != undefined ? State['core:geometry'][0] : State['geometry'][0];
-                            let Point = geometry['gml:Point'] != undefined ? geometry['gml:Point'][0] : geometry['Point'][0];
-                            let pos = Point['gml:pos'] != undefined ? Point['gml:pos'][0] : Point['pos'][0];
-
-                            let state = pos['_'] != undefined ? pos['_'].split(' ') : pos.split(' ');
-
-                            state.pop();
-                            
-                            state[0] = parseFloat(state[0]);
-                            state[1] = parseFloat(state[1]);
-
-                            state_array.push(state);
-                        })
+                        if (stateMemberList != undefined) {
+                            stateMemberList.map((stateMember)=>{
+                                let State = stateMember['core:State'] != undefined ? stateMember['core:State'][0] : stateMember['State'][0];
+                                let geometry = State['core:geometry'] != undefined ? State['core:geometry'][0] : State['geometry'][0];
+                                let Point = geometry['gml:Point'] != undefined ? geometry['gml:Point'][0] : geometry['Point'][0];
+                                let pos = Point['gml:pos'] != undefined ? Point['gml:pos'][0] : Point['pos'][0];
+    
+                                let state = pos['_'] != undefined ? pos['_'].split(' ') : pos.split(' ');
+    
+                                state.pop();
+                                
+                                state[0] = parseFloat(state[0]);
+                                state[1] = parseFloat(state[1]);
+    
+                                state_array.push(state);
+                            })
+                        }
                         
                         let edges = SpaceLayer['core:edges'] != undefined ? SpaceLayer['core:edges'][0] : SpaceLayer['edges'][0];
                         let transitionMemberList = edges['core:transitionMember'] != undefined ? edges['core:transitionMember'] : edges['transitionMember'];
