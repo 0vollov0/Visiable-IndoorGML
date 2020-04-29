@@ -57,16 +57,17 @@ export default class {
                     spaceLayerMemberList.map((spaceLayerMember)=>{
                         let nodes = spaceLayerMember['core:SpaceLayer'][0]['core:nodes'];
                         let stateMemberList = nodes[0]['core:stateMember'];
-                        
-                        stateMemberList.map((stateMember)=>{
-                            //let state = stateMember['core:State'][0]['core:geometry'][0]['gml:Point'][0]['gml:pos'][0]['_'];              
-                            let statePos = stateMember['core:State'][0]['core:geometry'][0]['gml:Point'][0]['gml:pos'];
-                            statePos.map((pos)=>{
-                                pos['_'] = stateCoordinateArray[stateIndex][0] + ' ' + stateCoordinateArray[stateIndex][1] + ' ' + pos['_'].split(' ')[2];
+                        if (stateMemberList != undefined) {
+                            stateMemberList.map((stateMember)=>{
+                                //let state = stateMember['core:State'][0]['core:geometry'][0]['gml:Point'][0]['gml:pos'][0]['_'];              
+                                let statePos = stateMember['core:State'][0]['core:geometry'][0]['gml:Point'][0]['gml:pos'];
+                                statePos.map((pos)=>{
+                                    pos['_'] = stateCoordinateArray[stateIndex][0] + ' ' + stateCoordinateArray[stateIndex][1] + ' ' + pos['_'].split(' ')[2];
+                                })
+                                //state = stateCoordinateArray[stateIndex][0] + ' ' + stateCoordinateArray[stateIndex][1] + ' ' + state.split(' ')[2];
+                                stateIndex++;
                             })
-                            //state = stateCoordinateArray[stateIndex][0] + ' ' + stateCoordinateArray[stateIndex][1] + ' ' + state.split(' ')[2];
-                            stateIndex++;
-                        })
+                        }
 
                         let edges = spaceLayerMember['core:SpaceLayer'][0]['core:edges'];
                         let transitionMemberList = edges[0]['core:transitionMember'];
